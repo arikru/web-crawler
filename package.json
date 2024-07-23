@@ -1,6 +1,7 @@
 {
   "name": "web-crawler",
   "version": "1.0.0",
+  "type": "module",
   "description": "Another Javascript-based Web Crawler",
   "main": "index.js",
   "scripts": {
@@ -123,6 +124,7 @@
     "jest-worker": "^29.7.0",
     "js-tokens": "^4.0.0",
     "js-yaml": "^3.14.1",
+    "jsdom": "^24.1.1",
     "jsesc": "^2.5.2",
     "json-parse-even-better-errors": "^2.3.1",
     "json5": "^2.2.3",
