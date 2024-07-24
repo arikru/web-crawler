@@ -19,7 +19,7 @@ async function crawlPage(baseURL, currentURL, pages = {}) {
   //console.log(htmlContent);
   const urlList = getURLsFromHTML(htmlContent, baseURL);
   for (let url of urlList) {
-    console.log(pages);
+    //console.log(pages);
     pages = await crawlPage(baseURL, url, (pages = pages));
   }
   return pages;
