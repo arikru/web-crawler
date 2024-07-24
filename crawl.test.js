@@ -23,11 +23,64 @@ test("Empty URL should return empty string (I guess?)", () => {
   expect(normalizeURL("")).toBe("");
 });
 
-test("Check the stuff", () => {
+test("Test relative to absolute URL", () => {
   const test_string = `<html>
     <body>
-        <a href="https://blog.boot.dev"><span>Go to Boot.dev</span></a>
+        <a href="/v1.html"><span>Go to Boot.dev/v1.html</span></a>
     </body>
 </html>`;
-  expect(getURLsFromHTML(test_string)).toBe("Go to Boot.dev");
+  const result = getURLsFromHTML(test_string, "https://boot.dev");
+  expect(result).toStrictEqual(["https://boot.dev/v1.html"]);
+});
+
+test("Path already absolute", () => {
+  const test_string = `<html>
+    <body>
+        <a href="https://boot.dev/v1.html"><span>Go to Boot.dev/v1.html</span></a>
+    </body>
+</html>`;
+  const result = getURLsFromHTML(test_string, "https://boot.dev");
+  expect(result).toStrictEqual(["https://boot.dev/v1.html"]);
+});
+
+test("Multiple relative paths", () => {
+  const test_string = `<html>
+    <body>
+        <a href="/v1.html"><span>Go to Boot.dev/v1.html</span></a>
+        <a href="/v2.html"><span>Go to Boot.dev/v2.html</span></a>
+    </body>
+</html>`;
+  const result = getURLsFromHTML(test_string, "https://boot.dev");
+  expect(result).toStrictEqual([
+    "https://boot.dev/v1.html",
+    "https://boot.dev/v2.html",
+  ]);
+});
+
+test("Multiple absolute paths", () => {
+  const test_string = `<html>
+    <body>
+        <a href="https://boot.dev/v1.html"><span>Go to Boot.dev/v1.html</span></a>
+        <a href="https://boot.dev/v2.html"><span>Go to Boot.dev/v2.html</span></a>
+    </body>
+</html>`;
+  const result = getURLsFromHTML(test_string, "https://boot.dev");
+  expect(result).toStrictEqual([
+    "https://boot.dev/v1.html",
+    "https://boot.dev/v2.html",
+  ]);
+});
+
+test("Multiple mixed paths", () => {
+  const test_string = `<html>
+    <body>
+        <a href="/v1.html"><span>Go to Boot.dev/v1.html</span></a>
+        <a href="https://boot.dev/v2.html"><span>Go to Boot.dev/v2.html</span></a>
+    </body>
+</html>`;
+  const result = getURLsFromHTML(test_string, "https://boot.dev");
+  expect(result).toStrictEqual([
+    "https://boot.dev/v1.html",
+    "https://boot.dev/v2.html",
+  ]);
 });

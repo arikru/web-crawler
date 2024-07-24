@@ -1,11 +1,17 @@
 import { JSDOM } from "jsdom";
 
-function getURLsFromHTML(html) {
+function getURLsFromHTML(html, baseURL) {
   const dom = new JSDOM(html);
+  const parsedURL = new URL(baseURL);
   const nodes = dom.window.document.querySelectorAll("a");
   const urlList = [];
-  nodes.forEach((node) => urlList.push(node.href));
-
+  nodes.forEach(function (node) {
+    if (node.toString().startsWith("/")) {
+      urlList.push(`${parsedURL.protocol}//${parsedURL.host}${node}`);
+    } else {
+      urlList.push(node.href);
+    }
+  });
   return urlList;
 }
 
