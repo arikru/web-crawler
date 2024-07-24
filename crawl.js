@@ -1,6 +1,31 @@
 import { JSDOM } from "jsdom";
 
-async function crawlPage(currentURL) {
+async function crawlPage(baseURL, currentURL, pages = {}) {
+  //console.log("Parsing baseURL ...");
+  const parsedBaseURL = new URL(baseURL);
+  //console.log(`Parsed baseURL: ${parsedBaseURL}`);
+  const parsedCurrentURL = new URL(currentURL);
+  if (parsedBaseURL.host !== parsedCurrentURL.host) {
+    return pages;
+  }
+  const normalizedURL = normalizeURL(currentURL);
+  if (normalizedURL in pages) {
+    pages[normalizedURL] = pages[normalizedURL] + 1;
+    return pages;
+  } else {
+    pages[normalizedURL] = 1;
+  }
+  const htmlContent = await fetchCurrentURL(currentURL);
+  //console.log(htmlContent);
+  const urlList = getURLsFromHTML(htmlContent, baseURL);
+  for (let url of urlList) {
+    console.log(pages);
+    pages = await crawlPage(baseURL, url, (pages = pages));
+  }
+  return pages;
+}
+
+async function fetchCurrentURL(currentURL) {
   try {
     const result = await fetch(currentURL);
     if (!result.ok) {
@@ -17,7 +42,7 @@ async function crawlPage(currentURL) {
       return;
     }
     const html = await result.text();
-    console.log(html);
+    return html;
   } catch (error) {
     console.error(`Error occured: ${error.message}`);
     return;
@@ -26,16 +51,22 @@ async function crawlPage(currentURL) {
 
 function getURLsFromHTML(html, baseURL) {
   const dom = new JSDOM(html);
-  const parsedURL = new URL(baseURL);
   const nodes = dom.window.document.querySelectorAll("a");
   const urlList = [];
-  nodes.forEach(function (node) {
-    if (node.toString().startsWith("/")) {
-      urlList.push(`${parsedURL.protocol}//${parsedURL.host}${node}`);
-    } else {
-      urlList.push(node.href);
+  for (const node of nodes) {
+    if (node.hasAttribute("href")) {
+      let href = node.getAttribute("href");
+
+      try {
+        // convert any relative URLs to absolute URLs
+        href = new URL(href, baseURL).href;
+        urlList.push(href);
+      } catch (err) {
+        console.log(`${err.message}: ${href}`);
+      }
     }
-  });
+  }
+
   return urlList;
 }
 
